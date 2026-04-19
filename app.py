@@ -58,12 +58,12 @@ def main():
 
     st.markdown("""
         <style>
-        header {visibility: hidden;} /* 隱藏最上面的工具欄 */
+        header {visibility: hidden;}
         .main .block-container {
-            padding-top: 0rem !important; /* 頂部間距歸零 */
+            padding-top: 0rem !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
-            margin-top: -50px; /* 強制往上頂 */
+            margin-top: -50px;
         }
         .block-container { padding-top: 1rem !important; }
         .stApp { background-color: #0E1117; }
@@ -75,66 +75,38 @@ def main():
         </style>
     """, unsafe_allow_html=True)
 
-    st.sidebar.write("---")
     st.sidebar.subheader("🕹️ 節能策略模擬")
     strategy_light = st.sidebar.toggle("燈光亮度減半 (50%)", key="s_light_unique")
     strategy_ac = st.sidebar.toggle("冷氣進入環保模式 (+2°C)", key="s_ac_unique")
 
+    # 3. 【核心計算】這段要放在所有 if 顯示之前！
     if strategy_light:
         df.loc[df['設備類型'] == '燈光照明', '即時功耗(kW)'] *= 0.5
     if strategy_ac:
         df.loc[df['設備類型'] == '冷氣用電', '即時功耗(kW)'] *= 0.8
     
+    # 重新計算碳排與碳費 (確保數據是最新的)
     df["碳排當量(kg)"] = round(df["即時功耗(kW)"] * manager.carbon_factor, 2)
     df["預估碳費(TWD)"] = round((df["碳排當量(kg)"] / 1000) * manager.carbon_tax_rate, 4)
 
+    # 4. 【唯一的一個 if 區塊】
     if page == "📊 即時能源監控":
         st.title("🏛️ 智慧化 ESG 能源監控平台")
         st.write(f"數據更新時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | 電力排放係數: `{manager.carbon_factor}`")
 
+        # 在這裡做數據統計
         total_p = df["即時功耗(kW)"].sum()
         total_c = df["碳排當量(kg)"].sum()
         floor_summary = df.groupby('樓層')[["即時功耗(kW)", "碳排當量(kg)"]].sum()
         device_summary = df.groupby('設備類型')["即時功耗(kW)"].sum().sort_values(ascending=False)
 
+        # 在這裡顯示 KPI
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("全館總負載", f"{total_p:,.1f} kW")
         m2.metric("即時總碳排", f"{total_c:,.2f} kg/h")
         m3.metric("1F 區域負載", f"{floor_summary.loc['1F', '即時功耗(kW)']:,.1f} kW")
         m4.metric("4F 區域負載", f"{floor_summary.loc['4F', '即時功耗(kW)']:,.1f} kW")
-
-        st.write("---")
-
-    st.sidebar.subheader("🕹️ 節能策略模擬")
-    strategy_light = st.sidebar.toggle("燈光亮度減半 (50%)")
-    strategy_ac = st.sidebar.toggle("冷氣進入環保模式 (+2°C)")
-
-    if strategy_light:
-        df.loc[df['設備類型'] == '燈光照明', '即時功耗(kW)'] *= 0.5
-    if strategy_ac:
-        df.loc[df['設備類型'] == '冷氣用電', '即時功耗(kW)'] *= 0.8
-    
-    df["碳排當量(kg)"] = round(df["即時功耗(kW)"] * manager.carbon_factor, 2)
-    df["預估碳費(TWD)"] = round((df["碳排當量(kg)"] / 1000) * manager.carbon_tax_rate, 4)
-
-    if page == "📊 即時能源監控":
-        # --- 原有的監控儀表板 ---
-        st.title("🏛️ 智慧化 ESG 能源監控平台")
-        st.write(f"數據更新時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | 電力排放係數: `{manager.carbon_factor}`")
-
-        # 數據統計計算
-        total_p = df["即時功耗(kW)"].sum()
-        total_c = df["碳排當量(kg)"].sum()
-        floor_summary = df.groupby('樓層')[["即時功耗(kW)", "碳排當量(kg)"]].sum()
-        device_summary = df.groupby('設備類型')["即時功耗(kW)"].sum().sort_values(ascending=False)
-
-        # --- KPI 顯示 ---
-        m1, m2, m3, m4 = st.columns(4)
-        m1.metric("全館總負載", f"{total_p:,.1f} kW")
-        m2.metric("即時總碳排", f"{total_c:,.2f} kg/h")
-        m3.metric("1F 區域負載", f"{floor_summary.loc['1F', '即時功耗(kW)']:,.1f} kW")
-        m4.metric("4F 區域負載", f"{floor_summary.loc['4F', '即時功耗(kW)']:,.1f} kW")
-
+        
         st.write("---")
 
         # --- 圖表區 ---
