@@ -72,6 +72,7 @@ def main():
         [data-testid="stMetricValue"] { color: #00FF41 !important; }
         [data-testid="stMetricLabel"] { color: #CCCCCC !important; }
         [data-testid="stMetric"] { background-color: #161B22; border: 1px solid #00FF41; padding: 10px; border-radius: 10px; }
+                
         div.stButton > button {
             background-color: #161B22 !important; /* 按鈕背景深色 */
             color: #FFFFFF !important;            /* 文字白色 */
@@ -89,6 +90,29 @@ def main():
                 
         div.stButton > button:active {
             transform: scale(0.95) !important;    /* 縮放一下的感覺 */
+        }
+                
+                [data-testid="stElementToolbar"] {
+            background-color: transparent !important; /* 讓背景透明 */
+            right: 1rem !important;
+        }
+                
+        div[data-testid="stElementToolbar"] > div {
+            background-color: #161B22 !important; /* 改為深灰色 */
+            border: 1px solid #00FF41 !important; /* 加上綠色邊框更有質感 */
+            border-radius: 5px;
+        }
+
+        [data-testid="stElementToolbar"] svg {
+            fill: #00FF41 !important;
+        }
+
+        .stDataFrame, [data-testid="stTable"] {
+            background-color: #0E1117 !important;
+        }
+
+        input[aria-label="Search records"] {
+            color: #FFFFFF !important;
         }
         </style>
     """, unsafe_allow_html=True)
