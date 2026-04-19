@@ -58,9 +58,15 @@ def main():
     st.markdown("""
         <style>
         .stApp { background-color: #0E1117; }
-        [data-testid="stMetricValue"] { color: #00FF41; }
-        [data-testid="stMetricLabel"] { color: #FFFFFF; }
-        .stMetric { background-color: #161B22; border: 1px solid #00FF41; padding: 15px; border-radius: 10px; }
+        h1, h2, h3, p, span { color: #FFFFFF !important; }
+        [data-testid="stMetricValue"] { color: #00FF41 !important; }
+        [data-testid="stMetricLabel"] { color: #CCCCCC !important; }
+        [data-testid="stMetric"] {
+            background-color: #161B22;
+            border: 1px solid #00FF41;
+            padding: 15px;
+            border-radius: 10px;
+        }
         </style>
     """, unsafe_allow_html=True)
 
