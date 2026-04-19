@@ -70,8 +70,8 @@ def main():
 
     st.sidebar.write("---")
     st.sidebar.subheader("🕹️ 節能策略模擬")
-    strategy_light = st.sidebar.toggle("燈光亮度減半 (50%)")
-    strategy_ac = st.sidebar.toggle("冷氣進入環保模式 (+2°C)")
+    strategy_light = st.sidebar.toggle("燈光亮度減半 (50%)", key="s_light_unique")
+    strategy_ac = st.sidebar.toggle("冷氣進入環保模式 (+2°C)", key="s_ac_unique")
 
     if strategy_light:
         df.loc[df['設備類型'] == '燈光照明', '即時功耗(kW)'] *= 0.5
