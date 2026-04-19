@@ -72,6 +72,24 @@ def main():
         [data-testid="stMetricValue"] { color: #00FF41 !important; }
         [data-testid="stMetricLabel"] { color: #CCCCCC !important; }
         [data-testid="stMetric"] { background-color: #161B22; border: 1px solid #00FF41; padding: 10px; border-radius: 10px; }
+        div.stButton > button {
+            background-color: #161B22 !important; /* 按鈕背景深色 */
+            color: #FFFFFF !important;            /* 文字白色 */
+            border: 2px solid #00FF41 !important; /* 螢光綠邊框 */
+            border-radius: 10px !important;       /* 圓角 */
+            padding: 10px 24px !important;        /* 間距 */
+            transition: all 0.3s ease !important; /* 動畫效果 */
+        }
+
+        div.stButton > button:hover {
+            background-color: #00FF41 !important; /* 背景變綠色 */
+            color: #0E1117 !important;            /* 文字變黑色 */
+            box-shadow: 0 0 15px #00FF41 !important; /* 發光效果 */
+        }
+                
+        div.stButton > button:active {
+            transform: scale(0.95) !important;    /* 縮放一下的感覺 */
+        }
         </style>
     """, unsafe_allow_html=True)
 
