@@ -3,9 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime
-
-# --- 關鍵連結：引入會計模組 ---
-from finance import SMB_CarbonAccounting
+from finance import SMB_CarbonAccounting # 抓finance.py的東西來用
 
 class JamiecompanyESGManager:
     def __init__(self):
@@ -50,7 +48,6 @@ class JamiecompanyESGManager:
 def main():
     st.set_page_config(page_title="EcoPay 企業 ESG 管理系統", layout="wide")
     
-    # --- 側邊欄導覽功能 ---
     st.sidebar.title("🌿 EcoPay 管理後台")
     st.sidebar.markdown("服務中小企業，達成智慧化 ESG 轉型。")
     page = st.sidebar.radio("請選擇操作視窗：", ["📊 即時能源監控", "💰 會計碳稅日結"])
@@ -58,12 +55,34 @@ def main():
     manager = JamiecompanyESGManager()
     df = manager.fetch_live_signals()
 
+    st.markdown("""
+        <style>
+        .stApp { background-color: #0E1117; }
+        [data-testid="stMetricValue"] { color: #00FF41; }
+        [data-testid="stMetricLabel"] { color: #FFFFFF; }
+        .stMetric { background-color: #161B22; border: 1px solid #00FF41; padding: 15px; border-radius: 10px; }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.sidebar.write("---")
+    st.sidebar.subheader("🕹️ 節能策略模擬")
+    strategy_light = st.sidebar.toggle("燈光亮度減半 (50%)")
+    strategy_ac = st.sidebar.toggle("冷氣進入環保模式 (+2°C)")
+
+    if strategy_light:
+        df.loc[df['設備類型'] == '燈光照明', '即時功耗(kW)'] *= 0.5
+    if strategy_ac:
+        df.loc[df['設備類型'] == '冷氣用電', '即時功耗(kW)'] *= 0.8
+    
+    df["碳排當量(kg)"] = round(df["即時功耗(kW)"] * manager.carbon_factor, 2)
+    df["預估碳費(TWD)"] = round((df["碳排當量(kg)"] / 1000) * manager.carbon_tax_rate, 4)
+
     if page == "📊 即時能源監控":
         # --- 原有的監控儀表板 ---
         st.title("🏛️ 智慧化 ESG 能源監控平台")
         st.write(f"數據更新時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | 電力排放係數: `{manager.carbon_factor}`")
 
-        # --- 數據統計計算 ---
+        # 數據統計計算
         total_p = df["即時功耗(kW)"].sum()
         total_c = df["碳排當量(kg)"].sum()
         floor_summary = df.groupby('樓層')[["即時功耗(kW)", "碳排當量(kg)"]].sum()
@@ -121,7 +140,7 @@ def main():
             st.rerun()
 
     elif page == "💰 會計碳稅日結":
-        # --- 切換到會計專用視窗 ---
+        # 切換到會計專用視窗
         st.title("💼 中小企業碳會計日結系統")
         st.info("會計人員請確認今日營運數據，系統將自動計算應計負載與碳成本。")
         
