@@ -58,6 +58,13 @@ def main():
 
     st.markdown("""
         <style>
+        header {visibility: hidden;} /* 隱藏最上面的工具欄 */
+        .main .block-container {
+            padding-top: 0rem !important; /* 頂部間距歸零 */
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            margin-top: -50px; /* 強制往上頂 */
+        }
         .block-container { padding-top: 1rem !important; }
         .stApp { background-color: #0E1117; }
         h1, h2, h3, p, span, label { color: #FFFFFF !important; }
