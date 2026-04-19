@@ -48,6 +48,7 @@ class JamiecompanyESGManager:
 def main():
     st.set_page_config(page_title="EcoPay 企業 ESG 管理系統", layout="wide")
     
+    # 1. 先抓取數據
     st.sidebar.title("🌿 EcoPay 管理後台")
     st.sidebar.markdown("服務中小企業，達成智慧化 ESG 轉型。")
     page = st.sidebar.radio("請選擇操作視窗：", ["📊 即時能源監控", "💰 會計碳稅日結"])
@@ -57,20 +58,46 @@ def main():
 
     st.markdown("""
         <style>
+        .block-container { padding-top: 1rem !important; }
         .stApp { background-color: #0E1117; }
-        h1, h2, h3, p, span { color: #FFFFFF !important; }
+        h1, h2, h3, p, span, label { color: #FFFFFF !important; }
+        [data-testid="stSidebar"] { background-color: #161B22 !important; }
         [data-testid="stMetricValue"] { color: #00FF41 !important; }
         [data-testid="stMetricLabel"] { color: #CCCCCC !important; }
-        [data-testid="stMetric"] {
-            background-color: #161B22;
-            border: 1px solid #00FF41;
-            padding: 15px;
-            border-radius: 10px;
-        }
+        [data-testid="stMetric"] { background-color: #161B22; border: 1px solid #00FF41; padding: 10px; border-radius: 10px; }
         </style>
     """, unsafe_allow_html=True)
 
     st.sidebar.write("---")
+    st.sidebar.subheader("🕹️ 節能策略模擬")
+    strategy_light = st.sidebar.toggle("燈光亮度減半 (50%)")
+    strategy_ac = st.sidebar.toggle("冷氣進入環保模式 (+2°C)")
+
+    if strategy_light:
+        df.loc[df['設備類型'] == '燈光照明', '即時功耗(kW)'] *= 0.5
+    if strategy_ac:
+        df.loc[df['設備類型'] == '冷氣用電', '即時功耗(kW)'] *= 0.8
+    
+    df["碳排當量(kg)"] = round(df["即時功耗(kW)"] * manager.carbon_factor, 2)
+    df["預估碳費(TWD)"] = round((df["碳排當量(kg)"] / 1000) * manager.carbon_tax_rate, 4)
+
+    if page == "📊 即時能源監控":
+        st.title("🏛️ 智慧化 ESG 能源監控平台")
+        st.write(f"數據更新時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | 電力排放係數: `{manager.carbon_factor}`")
+
+        total_p = df["即時功耗(kW)"].sum()
+        total_c = df["碳排當量(kg)"].sum()
+        floor_summary = df.groupby('樓層')[["即時功耗(kW)", "碳排當量(kg)"]].sum()
+        device_summary = df.groupby('設備類型')["即時功耗(kW)"].sum().sort_values(ascending=False)
+
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("全館總負載", f"{total_p:,.1f} kW")
+        m2.metric("即時總碳排", f"{total_c:,.2f} kg/h")
+        m3.metric("1F 區域負載", f"{floor_summary.loc['1F', '即時功耗(kW)']:,.1f} kW")
+        m4.metric("4F 區域負載", f"{floor_summary.loc['4F', '即時功耗(kW)']:,.1f} kW")
+
+        st.write("---")
+
     st.sidebar.subheader("🕹️ 節能策略模擬")
     strategy_light = st.sidebar.toggle("燈光亮度減半 (50%)")
     strategy_ac = st.sidebar.toggle("冷氣進入環保模式 (+2°C)")
