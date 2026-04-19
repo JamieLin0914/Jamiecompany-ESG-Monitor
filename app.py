@@ -114,6 +114,25 @@ def main():
         input[aria-label="Search records"] {
             color: #FFFFFF !important;
         }
+                
+        .streamlit-expanderHeader p {
+            color: #FFFFFF !important;
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+        }
+
+        .streamlit-expanderContent {
+            color: #FFFFFF !important;
+            background-color: #161B22 !important; /* 讓內容背景深一點點，增加層次感 */
+        }
+                
+        .streamlit-expanderHeader svg {
+            fill: #00FF41 !important;
+        }
+
+        .streamlit-expanderContent li {
+            color: #FFFFFF !important;
+        }
         </style>
     """, unsafe_allow_html=True)
 
